@@ -12,12 +12,16 @@ function App() {
     nom:"dfsdf",
     segments:[
       {
-        nbMesure:Infinity,
+        nbMesure:5,
         base:4,
-        tempo:60
+        tempo:160
+      },{
+        nbMesure:3,
+        base:2,
+        tempo:90
       }
     ],
-    activeMesure:0,
+    globalMesure:0,
     activeSegment:0,  //index du segment
     activeBeat:0,
     playing:false,
@@ -33,17 +37,18 @@ function App() {
   const biper = new Biper()
 //============================================
 
-const bips = getBips; // point-virgule powaaa
+const bips = getBips(); // point-virgule powaaa
 const asyncLoop = async () => {
-  for await (let bip of bips()) {
-    console.log('from for loop')
+  for await (let bip of bips) {
+    let { activeBeat, activeMesure, globalMesure } = bip
+
     biper.play()
-    if(bip === 1){
+    if(bip.activeBeat === 1){
       biper.changeFrequency(1000) 
     }
     biper.stop(0.2)
 
-    let newState = { ...partition,  playing: true, biping: true, activeBeat: bip}
+    let newState = { ...partition,  playing: true, biping: true, activeBeat, activeMesure, globalMesure}
     setPartition(newState)
     newState = { ...newState, biping: false}
     setTimeout(() => {
@@ -73,6 +78,7 @@ const currentPage = () => {
       biping={partition.biping} 
       playing={partition.playing} 
       activeBeat={partition.activeBeat}
+      globalMesure={partition.globalMesure}
     />
   }else if (page === "#form"){
     return <Form />

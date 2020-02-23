@@ -7,7 +7,7 @@ const Metronome = props => {
             <button onClick= {props.clickPlayHandler}>Play</button>
             <button onClick={props.clickPauseHandler}>Pause</button>
             <div className={props.biping ? 'biping' : 'not-biping'}>Largeur</div> 
-            <h1>Mesure n°: {props.activeMesure}</h1>        
+            <h1>Mesure n°: {props.globalMesure}</h1>        
             <h1>Temps n°: {props.activeBeat}</h1>        
         </div>
     )

@@ -1,17 +1,8 @@
 //State global du metronome
 let state = {
-    nom: "dfsdf",
-    segments: [{
-        nbMesure: 2,
-        base: 4,
-        tempo: 120
-    },{
-        nbMesure: 2,
-        base: 3,
-        tempo: 60
-    }],
     //Numero de la mesure dans la partition
     activeMesure: 1,
+    globalMesure:1,
     ////index du segment
     indexActiveSegment: 0, 
     //Numero du temps dans la mesure 
@@ -41,8 +32,9 @@ const bips = {
 }
 
   //Charge le state depuis l'application
-export const init = (state) => {
-    state = {...state}
+export const init = (initialState) => {
+    state.nom = initialState.nom
+    state.segments = initialState.segments
 }
 
 // Gere la localisation dans la partition
@@ -66,6 +58,7 @@ const updateMesure = (state, nbMesure, indexActiveSegment) => {
         //Check si c'est le dernier segment de la partition
         if (indexActiveSegment == state.segments.length - 1) {
             //Si oui, renvoie que c'est finit
+            state.globalMesure = 1
             return {...newState, finished: true}
         } else {
             //Passe au segment suivant dans la partition
@@ -86,6 +79,7 @@ const updateBeat = (state, base, nbMesure, indexActiveSegment) => {
     if (state.activeBeat + 1 > base) {
         //Reset au premier temps        
         newState.activeBeat = 1
+        newState.globalMesure = newState.globalMesure + 1
         //Declenche update de la mesure
         newState = updateMesure(newState, nbMesure, indexActiveSegment)
     //Sinon on passe au temps suivant
@@ -115,7 +109,7 @@ export const play = () => {
 
     //Si c'est le premier temps de la premiere mesure du segment
     if(state.activeBeat == 1){
-        globalResolve({ value: state.activeBeat, done: false })
+        globalResolve({ value: {activeBeat: state.activeBeat, globalMesure: state.globalMesure}, done: false })
         state = updateStatePosition(state)
     }
     
@@ -125,11 +119,11 @@ export const play = () => {
             //Nettoie l'interval
             clearInterval(interval)
             //Reset du state au default
-            state = { ...state, playing: false , activeMesure: 1, indexActiveSegment: 0, activeBeat: 1, finished:false }
+            state = { ...state, playing: false , globalMesure: 1, indexActiveSegment: 0, activeBeat: 1, finished:false }
             globalResolve({ done: true })   
             return 
         }
-        globalResolve({ value: state.activeBeat, done: false })
+        globalResolve({ value: {activeBeat: state.activeBeat, globalMesure: state.globalMesure}, done: false })
         //Save le dernier segment en cours
         const lastSegment = state.indexActiveSegment
         //MAJ de la position dans la partition
