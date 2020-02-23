@@ -2,7 +2,7 @@ import React , {useState} from 'react'
 import './App.css'
 import Metronome from "./components/Metronome"
 import Form from "./components/Form"
-import { play, init } from "./LogicMetro"
+import { play, pause, init } from "./LogicMetro"
 
 function App() {
 
@@ -25,7 +25,7 @@ function App() {
   
   const [page, setPage] = useState("#home")
   // init(partition)
-
+  init(partition)
 //============================================
 
 const clickPlayHandler = e => {
@@ -39,12 +39,20 @@ const clickPlayHandler = e => {
   })
 
 }
+const clickPauseHandler = e => {
+  pause(() => setPartition({...partition, playing: false}))
+}
 //============================================
 
 
 const currentPage = () => {
   if(page === "#home"){
-    return <Metronome clickPlayHandler={clickPlayHandler} biping={partition.biping} playing={partition.playing} />
+    return <Metronome 
+      clickPlayHandler={clickPlayHandler} 
+      clickPauseHandler={clickPauseHandler}
+      biping={partition.biping} 
+      playing={partition.playing} 
+    />
   }else if (page === "#form"){
     return <Form />
   }
