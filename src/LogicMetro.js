@@ -1,9 +1,3 @@
-import Biper from "./Biper"
-import { getByDisplayValue } from "@testing-library/dom"
-
-//Gere l'oscillateur pour créer les sons
-const biper = new Biper()
-
 //State global du metronome
 let state = {
     nom: "dfsdf",
@@ -28,11 +22,16 @@ let state = {
 
 let globalResolve 
 
+
 const bips = {
     [Symbol.asyncIterator]() {
         return {
             count: 0,
             next() {
+                // this.count++
+                // if(this.count === 1){
+                //     return promise
+                // }
                 return new Promise((resolve, reject) => {
                     globalResolve = resolve
                 })  
@@ -101,7 +100,7 @@ let interval
 export const play = () => {
     //Le metronome est en train de jouer
     state = { ...state, playing: true }
-
+    console.log('play')
     //Si la partition est finit met fin a la recursion et clear l'interval
     if(state.finished) {
         clearInterval(interval)
@@ -117,13 +116,6 @@ export const play = () => {
     //Si c'est le premier temps de la premiere mesure du segment
     if(state.activeBeat == 1){
         globalResolve({ value: state.activeBeat, done: false })
-        //BIP
-        biper.play()
-        //Son aigue pour le premier temps
-        biper.changeFrequency(1000) 
-        //Stop le bip 200ms aprés
-        biper.stop(0.2)
-        //Update la position dans la partition
         state = updateStatePosition(state)
     }
     
@@ -137,12 +129,7 @@ export const play = () => {
             globalResolve({ done: true })   
             return 
         }
-        //Bip
-        biper.play()
         globalResolve({ value: state.activeBeat, done: false })
-        //Check si c'est le premier temps pour changer la frequence du son
-        if (state.activeBeat == 1) biper.changeFrequency(1000) 
-        biper.stop(0.2)
         //Save le dernier segment en cours
         const lastSegment = state.indexActiveSegment
         //MAJ de la position dans la partition
