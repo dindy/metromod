@@ -1,4 +1,5 @@
 import Biper from "./Biper"
+import { getByDisplayValue } from "@testing-library/dom"
 
 //Gere l'oscillateur pour créer les sons
 const biper = new Biper()
@@ -24,6 +25,21 @@ let state = {
     playing: false,
     finished: false,
   }
+
+let globalResolve 
+
+const bips = {
+    [Symbol.asyncIterator]() {
+        return {
+            count: 0,
+            next() {
+                return new Promise((resolve, reject) => {
+                    globalResolve = resolve
+                })  
+            }
+        }
+    }
+}
 
   //Charge le state depuis l'application
 export const init = (state) => {
@@ -82,7 +98,7 @@ const updateBeat = (state, base, nbMesure, indexActiveSegment) => {
 
 //
 let interval
-export const play = cb => {
+export const play = () => {
     //Le metronome est en train de jouer
     state = { ...state, playing: true }
 
@@ -100,10 +116,9 @@ export const play = cb => {
 
     //Si c'est le premier temps de la premiere mesure du segment
     if(state.activeBeat == 1){
+        globalResolve({ value: state.activeBeat, done: false })
         //BIP
         biper.play()
-        //CallBack pour mettre a jour le state de react en function du state du metronome
-        cb(state)
         //Son aigue pour le premier temps
         biper.changeFrequency(1000) 
         //Stop le bip 200ms aprés
@@ -119,15 +134,15 @@ export const play = cb => {
             clearInterval(interval)
             //Reset du state au default
             state = { ...state, playing: false , activeMesure: 1, indexActiveSegment: 0, activeBeat: 1, finished:false }
+            globalResolve({ done: true })   
             return 
         }
         //Bip
         biper.play()
+        globalResolve({ value: state.activeBeat, done: false })
         //Check si c'est le premier temps pour changer la frequence du son
         if (state.activeBeat == 1) biper.changeFrequency(1000) 
         biper.stop(0.2)
-        //CallBack pour react
-        cb(state)
         //Save le dernier segment en cours
         const lastSegment = state.indexActiveSegment
         //MAJ de la position dans la partition
@@ -137,14 +152,18 @@ export const play = cb => {
             //Si oui nettoie l'interval
             clearInterval(interval)
             //Appel le prochain segment
-           setTimeout(()=>{  play(cb)}, intervalMS)
+           setTimeout(()=>{  play()}, intervalMS)
         }
 
-    }, intervalMS);
+    }, intervalMS)
 }
 
 export const pause = cb => {
     clearInterval(interval)
     state.playing = false
     cb(state)
+}
+
+export const getBips = () => {
+    return bips
 }

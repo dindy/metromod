@@ -2,7 +2,7 @@ import React , {useState} from 'react'
 import './App.css'
 import Metronome from "./components/Metronome"
 import Form from "./components/Form"
-import { play, pause, init } from "./LogicMetro"
+import { getBips, play, pause, init } from "./LogicMetro"
 
 function App() {
 
@@ -28,17 +28,24 @@ function App() {
   init(partition)
 //============================================
 
-const clickPlayHandler = e => {
-  play(metroState => {
+const bips = getBips; // point-virgule powaaa
+
+(async function() {
+  for await (let bip of bips()) {
+  
     let newState = { ...partition,  playing: true, biping: true}
     setPartition(newState)
     newState = { ...newState, biping: false}
     setTimeout(() => {
       setPartition(newState)
     }, 70);
-  })
+  } 
+})()
 
+const clickPlayHandler = async(e) => {
+  play()
 }
+
 const clickPauseHandler = e => {
   pause(() => setPartition({...partition, playing: false}))
 }
