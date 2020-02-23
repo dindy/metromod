@@ -1,0 +1,7 @@
+.biping {
+    background: red;
+}
+.not-biping {
+    background: white;
+    transition: .2s; 
+}
